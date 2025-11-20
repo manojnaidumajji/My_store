@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Visista • Beautiful Frontend (Vanilla JS + Tailwind)</title>
+
+    <!-- Tailwind CDN (quick prototype) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      :root{
+        --bg: #0b1220;
+        --card: #071127;
+        --text: #e6eef8;
+        --muted: #9fb0c8;
+        --accent: #60a5fa;
+        --glass: rgba(10,14,20,0.48);
+      }
+
+      .theme-light{ --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --muted:#475569; --accent:#7c3aed; --glass: rgba(255,255,255,0.6); }
+      .theme-dark{ --bg:#0b1220; --card:#071127; --text:#e6eef8; --muted:#9fb0c8; --accent:#60a5fa; --glass: rgba(10,14,20,0.48);} 
+      .theme-neon{ --bg:#071426; --card:#0b2233; --text:#e6fff8; --muted:#9ef0ff; --accent:#00ffa3; --glass: rgba(0,255,163,0.06);} 
+      .theme-pastel{ --bg:#fffaf6; --card:#fff7ed; --text:#3b3a39; --muted:#7b6f72; --accent:#fca5a5; --glass: rgba(255,250,246,0.6);} 
+
+      body{ background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+      .glass{ background: var(--glass); }
+      .card{ background: var(--card); }
+      .muted{ color: var(--muted); }
+      .accent{ color: var(--accent); }
+      .btn-accent{ background: var(--accent); color: white; }
+
+      /* small niceties */
+      .smooth { transition: all 220ms cubic-bezier(.2,.9,.3,1); }
+    </style>
+  </head>
+  <body class="theme-dark min-h-screen smooth">
+
+    <header class="max-w-7xl mx-auto p-6 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="rounded-2xl p-2 glass">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="5" fill="var(--accent)" />
+            <path d="M7 9h10v2H7z" fill="white" opacity="0.95" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold">Visista Store's</h1>
+          <p class="text-sm muted">“Style isn't about the clothes you wear, it's about the confidence you carry.”</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 glass rounded-xl p-1">
+          <button class="px-3 py-1 rounded-lg text-sm smooth" data-filter="All">All</button>
+          <button class="px-3 py-1 rounded-lg text-sm smooth" data-filter="Baggy">Baggy</button>
+          <button class="px-3 py-1 rounded-lg text-sm smooth" data-filter="Fit">Fit</button>
+          <button class="px-3 py-1 rounded-lg text-sm smooth" data-filter="Korean">Korean</button>
+        </div>
+
+        <select id="themeSelector" class="rounded-lg p-2 text-sm smooth border-0 shadow-sm bg-opacity-60 glass">
+          <option value="theme-light">Light</option>
+          <option value="theme-dark" selected>Dark</option>
+          <option value="theme-neon">Neon</option>
+          <option value="theme-pastel">Pastel</option>
+        </select>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6">
+
+      <!-- hero / search -->
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="md:col-span-2 p-6 rounded-2xl card glass">
+          <h2 class="text-3xl font-bold">Clean storefront templates</h2>
+          <p class="text-sm muted">Beautiful product cards, filters, and themes. Built with Tailwind and vanilla JS.</p>
+
+          <div class="mt-4 flex gap-3 items-center">
+            <input id="search" placeholder="Search product, type or color..." class="flex-1 p-3 rounded-xl shadow-inner bg-white text-black border border-gray-300"" />
+            <button id="clearSearch" class="px-4 py-3 rounded-xl btn-accent">Clear</button>
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button class="px-3 py-1 rounded-full text-sm smooth small-tag">New</button>
+            <button class="px-3 py-1 rounded-full text-sm smooth small-tag">Sale</button>
+            <button class="px-3 py-1 rounded-full text-sm smooth small-tag">Popular</button>
+          </div>
+        </div>
+
+        <aside class="p-6 rounded-2xl card">
+          <h3 class="font-semibold">Summary</h3>
+          <div class="mt-4 space-y-3 text-sm muted">
+            <div class="flex justify-between"><span>Products</span><strong id="count">8</strong></div>
+            <div class="flex justify-between"><span>On Sale</span><strong id="onsale">2</strong></div>
+            <div class="flex justify-between"><span>In Stock</span><strong id="instock">8</strong></div>
+          </div>
+
+          <div class="mt-6">
+            <h4 class="text-sm font-medium">Quick Filters</h4>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+              <button class="p-2 rounded-lg text-sm filter-btn" data-filter="All">All</button>
+              <button class="p-2 rounded-lg text-sm filter-btn" data-filter="Baggy">Baggy</button>
+              <button class="p-2 rounded-lg text-sm filter-btn" data-filter="Fit">Fit</button>
+              <button class="p-2 rounded-lg text-sm filter-btn" data-filter="Korean">Korean</button>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- product grid -->
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold">Products</h3>
+          <p class="text-sm muted" id="resultsText">8 results</p>
+        </div>
+
+        <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- product cards are injected by JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- modal -->
+    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-6">
+      <div class="absolute inset-0 bg-black/40" data-close></div>
+      <div class="relative max-w-3xl w-full rounded-3xl overflow-hidden shadow-2xl card">
+        <div class="grid grid-cols-1 md:grid-cols-3">
+          <div id="modalImg" class="md:col-span-1 h-64 md:h-auto"></div>
+          <div class="p-6 md:col-span-2">
+            <div class="flex items-start justify-between">
+              <div>
+                <h2 id="modalTitle" class="text-2xl font-bold">Product title</h2>
+                <p id="modalType" class="text-sm muted mt-1">Type</p>
+              </div>
+              <button class="text-sm px-3 py-1 rounded-lg" data-close>Close</button>
+            </div>
+
+            <p id="modalDesc" class="mt-4 muted">Description</p>
+
+            <div class="mt-6 flex items-center gap-3">
+              <div>
+                <strong>Price</strong>
+                <div id="modalPrice" class="text-lg font-semibold mt-2">$0</div>
+              </div>
+
+              <div class="ml-auto">
+                <button id="addCart" class="px-4 py-2 rounded-xl font-semibold btn-accent">Add to Cart</button>
+              </div>
+            </div>
+
+            <div class="mt-6 text-sm muted" id="modalMeta">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="max-w-7xl mx-auto p-6 text-center text-sm muted">Style is the art of being yourself without saying a word</footer>
+
+    <script>
+      // --- Mock data ---
+            const products = [
+        { id:1, title:'Baggy Oversized Tee', type:'Baggy', price:19.99, img:"baggy oversize tees.jpg", desc:'Comfortable oversized tee. Perfect for street style.', onSale:true, stock:12, tags:['New','Popular']},
+        { id:2, title:'Tailored Fit Jacket', type:'Fit', price:79.99, img:'tailored fit jacket.jpg', desc:'Crisp tailored jacket for smart-casual looks.', onSale:false, stock:5, tags:['Formal']},
+        { id:3, title:'Korean Crop Hoodie', type:'Korean', price:39.99, img:'Korean crop hoodie.jpg', desc:'Minimal hoodie with clean lines.', onSale:false, stock:8, tags:['Minimal']},
+        { id:4, title:'Wide-leg Chinos', type:'Baggy', price:49.99, img:'wide leg chennos.jpg', desc:'Relaxed fit chinos for day-long comfort.', onSale:true, stock:20, tags:['Sale']},
+        { id:5, title:'Slim Jeans', type:'Fit', price:59.99, img:'slim jeans.jpg', desc:'Versatile slim jeans with stretch.', onSale:false, stock:10, tags:[]},
+        { id:6, title:'Soft Knit Sweater', type:'Korean', price:34.99, img:'Knit.jpg', desc:'Cozy knit for cool evenings.', onSale:false, stock:7, tags:['Popular']},
+        { id:7, title:'Casual Polo', type:'Fit', price:24.99, img:'polo.jpg', desc:'Classic polo for timeless style.', onSale:false, stock:15, tags:[]},
+        { id:8, title:'Denim Jacket', type:'Baggy', price:69.99, img:'jacket.jpg', desc:'Iconic denim jacket with rugged finish.', onSale:false, stock:4, tags:['New']},
+      ];
+
+      // --- helpers ---
+      const grid = document.getElementById('grid');
+      const searchInput = document.getElementById('search');
+      const clearSearch = document.getElementById('clearSearch');
+      const resultsText = document.getElementById('resultsText');
+      const countEl = document.getElementById('count');
+      const onsaleEl = document.getElementById('onsale');
+      const instockEl = document.getElementById('instock');
+
+      function renderCards(list){
+        grid.innerHTML = '';
+        list.forEach(p => {
+          const wrap = document.createElement('article');
+          wrap.className = 'rounded-2xl overflow-hidden shadow-lg cursor-pointer transform hover:scale-[1.02] transition card smooth';
+          wrap.innerHTML = `
+            <div class="relative h-64">
+              <img src="${p.img}" alt="${p.title}" class="w-full h-full object-cover" />
+              <div class="absolute left-3 top-3 px-3 py-1 rounded-xl text-xs font-semibold" style="background: rgba(0,0,0,0.45); color: white">${p.type}</div>
+            </div>
+            <div class="p-4">
+              <div class="flex items-center justify-between">
+                <h4 class="font-bold">${p.title}</h4>
+                <div class="text-sm font-semibold muted">${p.price.toFixed(2)}</div>
+              </div>
+              <p class="text-sm mt-2 muted">${p.tags.join(' • ')}</p>
+              <div class="mt-3 flex items-center justify-between text-sm">
+                <div class="muted">Stock ${p.stock}</div>
+                <div class="text-xs font-medium px-2 py-1 rounded-full glass">${p.onSale ? 'Sale' : 'Full Price'}</div>
+              </div>
+            </div>
+          `;
+
+          wrap.addEventListener('click', () => openModal(p));
+          grid.appendChild(wrap);
+        });
+
+        resultsText.textContent = list.length + ' results';
+        countEl.textContent = products.length;
+        onsaleEl.textContent = products.filter(p=>p.onSale).length;
+        instockEl.textContent = products.reduce((s,p)=>s+p.stock,0);
+      }
+
+      function openModal(p){
+        document.getElementById('modalTitle').textContent = p.title;
+        document.getElementById('modalType').textContent = p.type;
+        document.getElementById('modalDesc').textContent = p.desc;
+        document.getElementById('modalPrice').textContent = '$' + p.price.toFixed(2);
+        document.getElementById('modalMeta').innerHTML = `<p>Tags: ${p.tags.join(', ') || '—'}</p><p class="mt-2">Stock: ${p.stock}</p>`;
+        document.getElementById('modalImg').innerHTML = `<img src="${p.img}" class="w-full h-full object-cover" alt="${p.title}">`;
+        document.getElementById('modal').classList.remove('hidden');
+        document.getElementById('modal').classList.add('flex');
+      }
+
+      function closeModal(){
+        document.getElementById('modal').classList.remove('flex');
+        document.getElementById('modal').classList.add('hidden');
+      }
+
+      // --- filtering & searching ---
+      function applyFilters(){
+        const q = searchInput.value.trim().toLowerCase();
+        const activeFilter = document.querySelector('.filter-btn.active')?.dataset?.filter || 'All';
+
+        let out = products.filter(p=>{
+          const matchesQ = p.title.toLowerCase().includes(q) || p.tags.join(' ').toLowerCase().includes(q) || p.type.toLowerCase().includes(q);
+          const matchesFilter = activeFilter === 'All' || p.type === activeFilter;
+          return matchesQ && matchesFilter;
+        });
+        renderCards(out);
+      }
+
+      // initial render
+      renderCards(products);
+
+      // events
+      searchInput.addEventListener('input', applyFilters);
+      clearSearch.addEventListener('click', ()=>{ searchInput.value=''; applyFilters(); });
+
+      document.querySelectorAll('.filter-btn').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active','btn-accent'));
+          b.classList.add('active');
+          applyFilters();
+        });
+      });
+
+      document.querySelectorAll('[data-filter]').forEach(b=>{
+        b.addEventListener('click', ()=>{
+          const value = b.dataset.filter;
+          document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('btn-accent'));
+          b.classList.add('btn-accent');
+          // set quick filter in sidebar
+          document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+          const btn = Array.from(document.querySelectorAll('.filter-btn')).find(x=>x.dataset.filter===value);
+          if(btn) btn.classList.add('active');
+          applyFilters();
+        });
+      });
+
+      // modal close
+      document.querySelectorAll('[data-close]').forEach(e=>e.addEventListener('click', closeModal));
+
+      // theme switcher
+      document.getElementById('themeSelector').addEventListener('change', (e)=>{
+        document.body.className = e.target.value + ' smooth';
+      });
+
+      // keyboard escape to close modal
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
+
+      // small style for small tags
+      document.querySelectorAll('.small-tag').forEach(t => t.classList.add('glass', 'px-3','py-1','rounded-full'));
+
+    </script>
+  </body>
+</html>
